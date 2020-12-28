@@ -12,6 +12,9 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+
+import pl.droidsonroids.gif.GifImageView;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -39,9 +42,10 @@ public class FullscreenActivity extends AppCompatActivity {
     private final Handler mHideHandler = new Handler();
     private View mContentView;
 
+    private GifImageView mGold1;
+    private ImageView mGrey1;
     private MediaPlayer mMediaPlayer;
-    private Button mBtnGold;
-    private Context mContext;
+        private Context mContext;
     private int mAudioIndex = 0;
     private int mAudio[] = {
             R.raw.spandau,
@@ -57,19 +61,9 @@ public class FullscreenActivity extends AppCompatActivity {
         @Override
         public void run() {
             // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    private View mControlsView;
+
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
@@ -78,7 +72,6 @@ public class FullscreenActivity extends AppCompatActivity {
             if (actionBar != null) {
                 actionBar.show();
             }
-            mControlsView.setVisibility(View.VISIBLE);
         }
     };
     private boolean mVisible;
@@ -120,40 +113,32 @@ public class FullscreenActivity extends AppCompatActivity {
 
         mContext = getApplicationContext();
 
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
+        mVisible = false;
 
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
+        mGold1 = findViewById(R.id.gold1);
+        mGold1.setVisibility(View.INVISIBLE);
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        mGrey1 = findViewById(R.id.grey1);
 
-        mBtnGold = findViewById(R.id.btnGold);
-        mBtnGold.setOnTouchListener(new View.OnTouchListener() {
+        mGrey1.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     mMediaPlayer = MediaPlayer.create(mContext, mAudio[mAudioIndex++]);
                     mMediaPlayer.start();
                     if (mAudioIndex == mAudio.length) mAudioIndex = 0;
+                    mGold1.setVisibility(View.VISIBLE);
                 } else if (motionEvent  .getAction() == MotionEvent.ACTION_UP) {
                     if (mMediaPlayer.isPlaying()) {
                         mMediaPlayer.stop();
                         mMediaPlayer.release();
                     }
+                    mGold1.setVisibility(View.INVISIBLE);
                 }
                 return true;
             }
         });
+
     }
 
     @Override
@@ -180,7 +165,6 @@ public class FullscreenActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.hide();
         }
-        mControlsView.setVisibility(View.GONE);
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay
